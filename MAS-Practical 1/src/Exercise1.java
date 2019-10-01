@@ -22,6 +22,8 @@ public class Exercise1 {
 				  rma = myContainer.createNewAgent("Fred" +agentcounter, SimpleAgent.class.getCanonicalName(), null);
 				  rma.start();
 			 }
+
+
 			
 		}catch(Exception e) {
 			System.out.println("Exception starting agent:" + e.toString());
