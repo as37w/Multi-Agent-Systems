@@ -10,7 +10,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../../GitHub/Multi-Agent-Systems/JADE-all-4.5.0/JADE-bin-4.5.0/jade/lib/jade.jar!/" />
+          <root url="jar://$MODULE_DIR$/../JADE-all-4.5.0/JADE-bin-4.5.0/jade/lib/jade.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
