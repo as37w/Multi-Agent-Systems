@@ -111,7 +111,41 @@ public class BookBuyerAgent extends Agent {
                         block();
                     }
                     break;
+
+                case 2:
+                    //Send the purchase order to the seller that provided the best offer
+                    ACLMessage order = new ACLMessage((ACLMessage.ACCEPT_PROPOSAL));
+                    order.addReceiver(bestSeller);
+                    order.setContent(targetBookTitle);
+                    order.setConversationId("book-trade");
+                    order.setReplyWith("Order" + System.currentTimeMillis());
+                    myAgent.send(order);
+
+                    //prepare the template to get the purchase order
+                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId("book-trade"), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
+                    step = 3;
+                    break;
+
+                case 3:
+                    //Recieve the purchase order reply
+                    reply = myAgent.receive(mt);
+                    if (reply != null){
+                        //Purchase order reply recieved
+                        if(reply.getPerformative() == ACLMessage.INFORM){
+                            //Purchase sucsessful. Terminate
+                            System.out.println(targetBookTitle+" Successfully purchased!");
+                            System.out.println("Price = " + bestPrice);
+                            myAgent.doDelete();
+                        }
+                        step = 4;
+                    }
+                    else{
+                        block();
+                    }
+                    break;
             }
+
+
         }
 
         public boolean done() {
