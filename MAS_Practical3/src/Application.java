@@ -18,6 +18,10 @@ public class Application  {
             AgentController myAgent = myContainer.createNewAgent("Auctioneer", Auctioneer.class.getCanonicalName(), null);
             myAgent.start();
 
+
+
+
+
         }catch(Exception e){
             System.out.println("Exception starting agent" + e.toString());
         }
