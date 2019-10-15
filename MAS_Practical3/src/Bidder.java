@@ -15,7 +15,7 @@ public class Bidder extends Agent {
 
     protected void setup() {
 
-        System.out.println("Hello! Auctioneer " + getAID().getName() + " is ready.");
+        System.out.println("Hello! Bidder " + getAID().getName() + " is ready.");
         //Get the title of book to buy as a startup argument.
         Object[] args = getArguments();
         if(args != null && args.length > 0){
