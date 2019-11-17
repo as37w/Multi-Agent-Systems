@@ -18,7 +18,7 @@ public class Main {
 			AgentController simulationAgent = myContainer.createNewAgent("buyer1", BuyerAgent.class.getCanonicalName(), null);
 			simulationAgent.start();
 			
-			int numSellers = 1;
+			int numSellers = 5;
 			AgentController seller;
 			for(int i=0; i<numSellers; i++) {
 				seller = myContainer.createNewAgent("seller" + i, SellerAgent.class.getCanonicalName(), null);
