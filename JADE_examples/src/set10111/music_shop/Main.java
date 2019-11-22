@@ -1,4 +1,4 @@
-package set10111.simulation;
+package set10111.music_shop;
 import jade.core.*;
 import jade.core.Runtime;
 import jade.wrapper.AgentController;
@@ -15,19 +15,16 @@ public class Main {
 			AgentController rma = myContainer.createNewAgent("rma", "jade.tools.rma.rma", null);
 			rma.start();
 			
-			AgentController simulationAgent = myContainer.createNewAgent("buyer1", BuyerAgent.class.getCanonicalName(), null);
-			simulationAgent.start();
+			AgentController sellerAgent = myContainer.createNewAgent("seller", SellerAgent.class.getCanonicalName(), null);
+			sellerAgent.start();
 			
-			int numSellers = 5;
-			AgentController seller;
-			for(int i=0; i<numSellers; i++) {
-				seller = myContainer.createNewAgent("seller" + i, SellerAgent.class.getCanonicalName(), null);
-				seller.start();
-			}
-			
-			AgentController tickerAgent = myContainer.createNewAgent("ticker", BuyerSellerTicker.class.getCanonicalName(),
+			AgentController buyerAgent = myContainer.createNewAgent("buyer", CautiousBuyerAgent.class.getCanonicalName(),
 					null);
-			tickerAgent.start();
+			buyerAgent.start();
+			
+			AgentController recklessBuyerAgent = myContainer.createNewAgent("reckless buyer", RecklessBuyerAgent.class.getCanonicalName(),
+					null);
+			recklessBuyerAgent.start();
 			
 		}
 		catch(Exception e){
