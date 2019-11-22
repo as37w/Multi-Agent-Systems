@@ -2,6 +2,8 @@ package set10111.simulation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -18,10 +20,11 @@ import jade.lang.acl.MessageTemplate;
 
 public class BuyerAgent extends Agent {
 	private ArrayList<AID> sellers = new ArrayList<>();
-	private ArrayList<String>  booksToBuy = new ArrayList<>();
-	private HashMap<String,ArrayList<Offer>> currentOffers = new HashMap<>();
+	private ArrayList<String> booksToBuy = new ArrayList<>();
+	private HashMap<String, ArrayList<Offer>> currentOffers = new HashMap<>();
 	private AID tickerAgent;
 	private int numQueriesSent;
+
 	@Override
 	protected void setup() {
 		//add this agent to the yellow pages
@@ -31,17 +34,16 @@ public class BuyerAgent extends Agent {
 		sd.setType("buyer");
 		sd.setName(getLocalName() + "-buyer-agent");
 		dfd.addServices(sd);
-		try{
+		try {
 			DFService.register(this, dfd);
-		}
-		catch(FIPAException e){
+		} catch (FIPAException e) {
 			e.printStackTrace();
 		}
 		//add books to buy
 		booksToBuy.add("Java for Dummies");
 		booksToBuy.add("JADE: the Inside Story");
 		booksToBuy.add("Multi-Agent Systems for Everybody");
-		
+
 		addBehaviour(new TickerWaiter(this));
 	}
 
@@ -49,10 +51,9 @@ public class BuyerAgent extends Agent {
 	@Override
 	protected void takeDown() {
 		//Deregister from the yellow pages
-		try{
+		try {
 			DFService.deregister(this);
-		}
-		catch(FIPAException e){
+		} catch (FIPAException e) {
 			e.printStackTrace();
 		}
 	}
@@ -68,27 +69,26 @@ public class BuyerAgent extends Agent {
 		public void action() {
 			MessageTemplate mt = MessageTemplate.or(MessageTemplate.MatchContent("new day"),
 					MessageTemplate.MatchContent("terminate"));
-			ACLMessage msg = myAgent.receive(mt); 
-			if(msg != null) {
-				if(tickerAgent == null) {
+			ACLMessage msg = myAgent.receive(mt);
+			if (msg != null) {
+				if (tickerAgent == null) {
 					tickerAgent = msg.getSender();
 				}
-				if(msg.getContent().equals("new day")) {
+				if (msg.getContent().equals("new day")) {
 					//spawn new sequential behaviour for day's activities
 					SequentialBehaviour dailyActivity = new SequentialBehaviour();
 					//sub-behaviours will execute in the order they are added
 					dailyActivity.addSubBehaviour(new FindSellers(myAgent));
 					dailyActivity.addSubBehaviour(new SendEnquiries(myAgent));
 					dailyActivity.addSubBehaviour(new CollectOffers(myAgent));
+					dailyActivity.addSubBehaviour(new CollateOffers(myAgent));
 					dailyActivity.addSubBehaviour(new EndDay(myAgent));
 					myAgent.addBehaviour(dailyActivity);
-				}
-				else {
+				} else {
 					//termination message to end simulation
 					myAgent.doDelete();
 				}
-			}
-			else{
+			} else {
 				block();
 			}
 		}
@@ -107,14 +107,13 @@ public class BuyerAgent extends Agent {
 			ServiceDescription sd = new ServiceDescription();
 			sd.setType("seller");
 			sellerTemplate.addServices(sd);
-			try{
+			try {
 				sellers.clear();
-				DFAgentDescription[] agentsType1  = DFService.search(myAgent,sellerTemplate); 
-				for(int i=0; i<agentsType1.length; i++){
+				DFAgentDescription[] agentsType1 = DFService.search(myAgent, sellerTemplate);
+				for (int i = 0; i < agentsType1.length; i++) {
 					sellers.add(agentsType1[i].getName()); // this is the AID
 				}
-			}
-			catch(FIPAException e) {
+			} catch (FIPAException e) {
 				e.printStackTrace();
 			}
 
@@ -132,16 +131,16 @@ public class BuyerAgent extends Agent {
 		public void action() {
 			//send out a call for proposals for each book
 			numQueriesSent = 0;
-			for(String bookTitle : booksToBuy) {
+			for (String bookTitle : booksToBuy) {
 				ACLMessage enquiry = new ACLMessage(ACLMessage.CFP);
 				enquiry.setContent(bookTitle);
 				enquiry.setConversationId(bookTitle);
-				for(AID seller : sellers) {
+				for (AID seller : sellers) {
 					enquiry.addReceiver(seller);
 					numQueriesSent++;
 				}
 				myAgent.send(enquiry);
-				
+
 			}
 
 		}
@@ -149,26 +148,26 @@ public class BuyerAgent extends Agent {
 
 	public class CollectOffers extends Behaviour {
 		private int numRepliesReceived = 0;
-		
+
 		public CollectOffers(Agent a) {
 			super(a);
 			currentOffers.clear();
 		}
 
-		
+
 		@Override
 		public void action() {
 			boolean received = false;
-			for(String bookTitle : booksToBuy) {
+			for (String bookTitle : booksToBuy) {
 				MessageTemplate mt = MessageTemplate.MatchConversationId(bookTitle);
 				ACLMessage msg = myAgent.receive(mt);
-				if(msg != null) {
+				if (msg != null) {
 					received = true;
 					numRepliesReceived++;
-					if(msg.getPerformative() == ACLMessage.PROPOSE) {
+					if (msg.getPerformative() == ACLMessage.PROPOSE) {
 						//we have an offer
 						//the first offer for a book today
-						if(!currentOffers.containsKey(bookTitle)) {
+						if (!currentOffers.containsKey(bookTitle)) {
 							ArrayList<Offer> offers = new ArrayList<>();
 							offers.add(new Offer(msg.getSender(),
 									Integer.parseInt(msg.getContent())));
@@ -180,17 +179,15 @@ public class BuyerAgent extends Agent {
 							offers.add(new Offer(msg.getSender(),
 									Integer.parseInt(msg.getContent())));
 						}
-							
+
 					}
 
 				}
 			}
-			if(!received) {
+			if (!received) {
 				block();
 			}
 		}
-
-		
 
 		@Override
 		public boolean done() {
@@ -200,14 +197,13 @@ public class BuyerAgent extends Agent {
 		@Override
 		public int onEnd() {
 			//print the offers
-			for(String book : booksToBuy) {
-				if(currentOffers.containsKey(book)) {
+			for (String book : booksToBuy) {
+				if (currentOffers.containsKey(book)) {
 					ArrayList<Offer> offers = currentOffers.get(book);
-					for(Offer o : offers) {
+					for (Offer o : offers) {
 						System.out.println(book + "," + o.getSeller().getLocalName() + "," + o.getPrice());
 					}
-				}
-				else {
+				} else {
 					System.out.println("No offers for " + book);
 				}
 			}
@@ -215,33 +211,85 @@ public class BuyerAgent extends Agent {
 		}
 
 	}
-	
-	
-	
-	public class EndDay extends OneShotBehaviour {
-		
-		public EndDay(Agent a) {
-			super(a);
-		}
+
+
+
+	public class CollateOffers extends Behaviour {
+		int no_of_offers;
 
 		@Override
 		public void action() {
-			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-			msg.addReceiver(tickerAgent);
-			msg.setContent("done");
-			myAgent.send(msg);
-			//send a message to each seller that we have finished
-			ACLMessage sellerDone = new ACLMessage(ACLMessage.INFORM);
-			sellerDone.setContent("done");
-			for(AID seller : sellers) {
-				sellerDone.addReceiver(seller);
+			AID bestPrice = new AID();
+			String bestBook = new String();
+			for (String key : currentOffers.keySet()) {
+				for (Offer o : currentOffers.get(key)) {
+					int price = o.getPrice();
+
+
+					if (o.getPrice() < price) {
+						bestPrice = o.getSeller();
+						bestBook = key.toString();
+
+					}
+				}
 			}
-			myAgent.send(sellerDone);
+
+			ACLMessage accept = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+			accept.addReceiver(bestPrice);
+			accept.setContent("Offer-Accepted");
+			accept.setConversationId(bestBook);
+			no_of_offers++;
+			myAgent.send(accept);
+
+
+			ACLMessage decline = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
+			for (String key : currentOffers.keySet()) {
+				for (Offer o : currentOffers.get(key)) {
+					if (o.getSeller() != bestPrice) {
+						decline.addReceiver(o.getSeller());
+						decline.setConversationId(key);
+						no_of_offers++;
+					}
+				}
+			}
+
+			decline.setContent("Offer-Declined");
+			myAgent.send(decline);
 		}
-		
+
+
+		@Override
+		public boolean done() {
+			return currentOffers.size() == no_of_offers;
+		}
 	}
 
-}
+		public class EndDay extends OneShotBehaviour {
+
+			public EndDay(Agent a) {
+				super(a);
+			}
+
+			@Override
+			public void action() {
+				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+				msg.addReceiver(tickerAgent);
+				msg.setContent("done");
+				myAgent.send(msg);
+				//send a message to each seller that we have finished
+				ACLMessage sellerDone = new ACLMessage(ACLMessage.INFORM);
+				sellerDone.setContent("done");
+				for (AID seller : sellers) {
+					sellerDone.addReceiver(seller);
+				}
+				myAgent.send(sellerDone);
+			}
+
+		}
+
+
+	}
+
 
 
 
