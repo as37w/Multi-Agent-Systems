@@ -15,6 +15,8 @@ import set10111.coursework_ontology.Ecommerce.EcommerceOntology;
 import set10111.coursework_ontology.elements.*;
 
 
+import javax.script.ScriptContext;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Supplier2 extends Agent {
@@ -23,6 +25,11 @@ public class Supplier2 extends Agent {
     private Ontology ontology = EcommerceOntology.getInstance();
     //stock list, with serial number as the key
     private HashMap<Integer, Phone> itemsForSale = new HashMap<>();
+    Ram ram = new Ram();
+    Storage storage = new Storage();
+
+    ArrayList<Integer> storageList = storage.getStorageList();
+    ArrayList<Integer> ramList = ram.getRamList();
 
     protected void setup(){
         getContentManager().registerLanguage(codec);
@@ -47,16 +54,14 @@ public class Supplier2 extends Agent {
                     if(ce instanceof Owns){
                         Owns owns = (Owns) ce;
                         Phone ph = owns.getPhone();
-                        Ram ram = (Ram) ph;
-                        Storage storage = (Storage) ph;
-                        System.out.println("Amount of ram: " + ((Ram) ph).getSize());
-                        System.out.print("Amount of storage: " + ((Storage)ph).getSpace());
+                        System.out.println("Amount of ram: " + ramList.indexOf(ram.getSerialNumber()));
+                        System.out.print("Amount of storage: " + storageList.indexOf(storage.getSerialNumber()));
 
-                        if(itemsForSale.containsKey(((Ram) ph).getSize())) {
+                        if(itemsForSale.containsKey(ramList.indexOf(ram.getSerialNumber()))){
                             System.out.println("Requested Ram in stock");
                         }
 
-                        if(itemsForSale.containsKey(((Storage)ph).getSpace())){
+                        if(itemsForSale.containsKey(storageList.indexOf(storage.getSerialNumber()))){
                             System.out.println("Requested Storage in stock");
                         }
 
@@ -91,18 +96,20 @@ public class Supplier2 extends Agent {
                     ce = getContentManager().extractContent(msg);
 
                     if(ce instanceof Action){
+                        Ram ram = new Ram();
+                        Storage storage = new Storage();
                         Concept action = ((Action)ce).getAction();
                         if(action instanceof Sells){
                             Sells order = (Sells)action;
                             Phone ph = order.getPhone();
 
                             if(ph instanceof Phone){
-                                if(itemsForSale.containsKey(((Ram) ph).getSize())) {
-                                    System.out.println(((Ram) ph).getSize() + "Ram Sold");
+                                if(itemsForSale.containsKey(ramList.indexOf(ram.getSerialNumber()))) {
+                                    System.out.println(ramList.indexOf(ram.getSerialNumber()) + "Ram Sold");
                                 }
 
-                                if(itemsForSale.containsKey(((Storage)ph).getSpace())){
-                                    System.out.println(((Storage) ph).getSpace() + "Storage Sold");
+                                if(itemsForSale.containsKey(storageList.indexOf(storage.getSerialNumber()))){
+                                    System.out.println(storageList.indexOf(storage.getSerialNumber()) + "Storage Sold");
                                 }
 
                                 }

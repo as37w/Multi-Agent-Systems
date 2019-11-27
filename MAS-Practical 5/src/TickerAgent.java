@@ -12,6 +12,7 @@ import jade.lang.acl.MessageTemplate;
 import java.util.ArrayList;
 
 public class TickerAgent extends Agent {
+
     protected void setup(){
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());

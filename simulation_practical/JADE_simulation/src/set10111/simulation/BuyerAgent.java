@@ -103,6 +103,7 @@ public class BuyerAgent extends Agent {
 
 		@Override
 		public void action() {
+
 			DFAgentDescription sellerTemplate = new DFAgentDescription();
 			ServiceDescription sd = new ServiceDescription();
 			sd.setType("seller");
