@@ -4,7 +4,7 @@ import jade.content.onto.annotations.Slot;
 
 import java.util.ArrayList;
 
-public class Ram extends Phone {
+public class Ram extends Item{
     private int size;
     private Boolean firstCall;
     private ArrayList<Integer> ramList = new ArrayList<>();
@@ -28,6 +28,7 @@ public class Ram extends Phone {
         if(firstCall){
             ramList.add(0);
             firstCall = false;
+            ramList.add(ram);
         }
         else
         {

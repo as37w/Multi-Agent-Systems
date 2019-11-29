@@ -1,5 +1,7 @@
 package SupplyChain;
 
+import com.sun.org.apache.xerces.internal.util.SynchronizedSymbolTable;
+import com.sun.org.apache.xpath.internal.operations.Or;
 import jade.content.lang.Codec;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.Ontology;
@@ -20,6 +22,8 @@ import set10111.coursework_ontology.elements.*;
 
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 
 public class Customer extends Agent {
     private int ordersSent = 0;
@@ -29,15 +33,28 @@ public class Customer extends Agent {
     private ArrayList<Phone> phonesToBuy = new ArrayList<>();
     private AID tickerAgent;
     int numOrdersSent;
+
+    Item item = new Item();
+    ArrayList<Item> itemList = new ArrayList<>();
+
+
     Phone phone = new Phone();
     Ram ram = new Ram();
     Storage storage = new Storage();
     Battery battery = new Battery();
     Screen screen = new Screen();
 
+    ArrayList<Integer> batteryList = battery.getBatteryList();
+    ArrayList<Integer> screenList = screen.getScreenList();
+    ArrayList<Integer> ramList = ram.getRamList();
+    ArrayList<Integer> storageList = storage.getStorageList();
+
 
     @Override
     protected void setup() {
+        getContentManager().registerLanguage(codec);
+        getContentManager().registerOntology(ontology);
+
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
@@ -114,6 +131,7 @@ public class Customer extends Agent {
                 DFAgentDescription[] agentsType1 = DFService.search(myAgent, manufacturerTemplate);
                 for (int i = 0; i < agentsType1.length; i++) {
                     manufacturers.add(agentsType1[i].getName()); // this is the AID
+                    System.out.println(manufacturers.toString());
                 }
             } catch (FIPAException e) {
                 e.printStackTrace();
@@ -138,13 +156,27 @@ public class Customer extends Agent {
             reqOrd.addReceiver(manufacturers.get(0));
             reqOrd.setLanguage(codec.getName());
             reqOrd.setOntology(ontology.getName());
+            reqOrd.setConversationId("cust-order");
+
+            Order order = new Order();
+            order.setPhone(phone);
+            order.setParts(itemList);
+
+            System.out.println(item.toString());
+
+            SendOrder sendOrder = new SendOrder();
+            sendOrder.setCustomer(this.myAgent.getAID());
+
+            sendOrder.setOrder(order);
 
             Action request = new Action();
-            request.setAction(phone);
+            request.setAction(sendOrder);
             request.setActor(manufacturers.get(0));
             try {
                 getContentManager().fillContent(reqOrd, request); //send the wrapper object
                 send(reqOrd);
+                System.out.println(reqOrd.toString());
+
             } catch (Codec.CodecException ce) {
                 ce.printStackTrace();
             } catch (OntologyException oe) {
@@ -161,27 +193,39 @@ public class Customer extends Agent {
 
         if (Math.random() < 0.5) {
             //small phone
-            screen.setScreenList(5);
-            battery.setBatteryList(2000);
+            battery.setCapacity(2000);
+            System.out.println(battery.getCapacity());
+            itemList.add(battery);
+            screen.setLength(5);
+            itemList.add(screen);
         } else {
             //phablet
-            screen.setScreenList(7);
-            battery.setBatteryList(30000);
+            battery.setCapacity(3000);
+            System.out.println(battery.getCapacity());
+            itemList.add(battery);
+            screen.setLength(7);
+            itemList.add(screen);
         }
         if (Math.random() < 0.5) {
-            ram.setRamList(4);
+            ram.setSize(4);
+            itemList.add(ram);
         } else {
-            ram.setRamList(8);
+            ram.setSize(8);
+            itemList.add(ram);
         }
         if (Math.random() < 0.5) {
-            storage.setStorageList(64);
+            storage.setSpace(64);
+            itemList.add(storage);
         } else {
-            storage.setStorageList(256);
+            storage.setSpace(256);
+            itemList.add(storage);
         }
+
 
         phone.setSerialNumber();
 
-        if (phone.getPricePerUnit() > 350) {
+
+        if (phone.getPricePerUnit() > 350 || phone.getPricePerUnit()< 350) {
             phone.setQuantity(Math.floor(1 + 50 * Math.random()));
             phone.setPricePerUnit(Math.floor(100 + 500 * Math.random()));
             phone.setnumDaysDue(Math.floor(1 + 10 * Math.random()));
@@ -203,12 +247,6 @@ public class Customer extends Agent {
             msg.addReceiver(tickerAgent);
             msg.setContent("done");
             myAgent.send(msg);
-            ACLMessage customerDone = new ACLMessage(ACLMessage.INFORM);
-            customerDone.setContent("done");
-            for(AID manufacturer : manufacturers){
-                customerDone.addReceiver(manufacturer);
-            }
-            myAgent.send(customerDone);
         }
 
 

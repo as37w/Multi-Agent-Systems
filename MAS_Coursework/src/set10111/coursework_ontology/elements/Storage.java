@@ -4,7 +4,7 @@ import jade.content.onto.annotations.Slot;
 
 import java.util.ArrayList;
 
-public class Storage extends Phone {
+public class Storage extends Item {
     private int space;
     private boolean firstCall = true;
     private ArrayList<Integer> storageList = new ArrayList<>();
@@ -27,6 +27,7 @@ public class Storage extends Phone {
         if(firstCall){
             storageList.add(0);
             firstCall = false;
+            storageList.add(storage);
         }
         else
         {

@@ -13,7 +13,7 @@ import jade.lang.acl.MessageTemplate;
 import java.util.ArrayList;
 
 public class Ticker extends Agent {
-    public static final int NUM_DAYS = 100;
+    public static final int NUM_DAYS = 10;
     @Override
     protected void setup() {
         //add this agent to the yellow pages
@@ -30,7 +30,7 @@ public class Ticker extends Agent {
             e.printStackTrace();
         }
         //wait for the other agents to start
-        doWait(30000);
+        doWait(5000);
         addBehaviour(new SynchAgentsBehaviour(this));
     }
 
@@ -113,7 +113,7 @@ public class Ticker extends Agent {
                     ACLMessage msg = myAgent.receive(mt);
                     if(msg != null) {
                         numFinReceived++;
-                        if(numFinReceived >= simulationAgents.size()) {
+                        if(numFinReceived >= simulationAgents.size() - 2) {
                             step++;
                         }
                     }

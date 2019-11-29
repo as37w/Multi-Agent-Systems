@@ -54,7 +54,9 @@ public class Supplier1 extends Agent {
                     ContentElement ce = null;
                     System.out.println(msg.getContent());
 
+
                     ce = getContentManager().extractContent(msg);
+                    /*
 
                     if(ce instanceof Owns){
                         Owns owns = (Owns) ce;
@@ -63,7 +65,7 @@ public class Supplier1 extends Agent {
                         System.out.print("Amount of storage: " + storageList.indexOf(storage.getSerialNumber()));
 
                         if(itemsForSale.containsKey(ramList.indexOf(ram.getSerialNumber()))){
-                            System.out.println("Requested Ram in stock");
+                          //  System.out.println("Requested Ram in stock");
                         }
 
                         if(itemsForSale.containsKey(storageList.indexOf(storage.getSerialNumber()))){
@@ -71,6 +73,7 @@ public class Supplier1 extends Agent {
                         }
 
                     }
+                    */
 
                 } catch(Codec.CodecException ce){
                     ce.printStackTrace();
@@ -80,9 +83,11 @@ public class Supplier1 extends Agent {
                     oe.printStackTrace();
                 }
 
+
             }else{
                 block();
             }
+
 
         }
 
@@ -98,7 +103,9 @@ public class Supplier1 extends Agent {
                     ContentElement ce = null;
                     System.out.println(msg.getContent());
 
-                    ce = getContentManager().extractContent(msg);
+
+                   ce = getContentManager().extractContent(msg);
+
 
                     if(ce instanceof Action){
                         Concept action = ((Action)ce).getAction();
@@ -107,17 +114,21 @@ public class Supplier1 extends Agent {
                             Phone ph = order.getPhone();
 
                             if(ph instanceof Phone){
-                                if(itemsForSale.containsKey(ramList.indexOf(ram.getSerialNumber()))) {
-                                    System.out.println(ramList.indexOf(ram.getSerialNumber()) + "Ram Sold");
+                                if(itemsForSale.containsKey(ramList.indexOf(ram.getRamList()))) {
+                                System.out.println(ramList.indexOf(ram.getRamList()) + "Ram Sold");
                                 }
 
-                                if(itemsForSale.containsKey(storageList.indexOf(storage.getSerialNumber()))){
-                                    System.out.println(storageList.indexOf(storage.getSerialNumber()) + "Storage Sold");
+                                if(itemsForSale.containsKey(storageList.indexOf(storage.getStorageList()))){
+                                System.out.println(storageList.indexOf(storage.getStorageList()) + "Storage Sold");
                                 }
+
+
 
                             }
 
-                        }
+
+                      }
+
                     }
                 } catch(Codec.CodecException ce){
                     ce.printStackTrace();
@@ -129,6 +140,7 @@ public class Supplier1 extends Agent {
             }else{
                 block();
             }
+
 
         }
     }

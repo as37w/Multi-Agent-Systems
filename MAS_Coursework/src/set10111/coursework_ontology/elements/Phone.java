@@ -8,18 +8,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Phone implements Concept {
     private int serialNumber;
     private double quantity;
-    private static final AtomicInteger counter = new AtomicInteger(0);
     private double numDaysDue;
     private double perDayPenalty;
     private double pricePerUnit;
 
     @Slot (mandatory = true)
     public int getSerialNumber(){
-        return counter.get();
+        return serialNumber;
     }
 
-    public void setSerialNumber() {
-        counter.incrementAndGet();
+    public void setSerialNumber() { serialNumber++;
     }
 
     public double getQuantity(){

@@ -4,7 +4,7 @@ import jade.content.onto.annotations.Slot;
 
 import java.util.ArrayList;
 
-public class Battery extends Phone {
+public class Battery extends Item {
 
     private ArrayList<Integer> batteryList = new ArrayList<>();
     private Boolean firstCall = true;
@@ -16,7 +16,7 @@ public class Battery extends Phone {
         return capacity;
     }
 
-    public void setCapacity(){
+    public void setCapacity(Integer capacity){
         this.capacity= capacity;
     }
 
@@ -28,6 +28,7 @@ public class Battery extends Phone {
         if(firstCall){
             batteryList.add(0);
             firstCall = false;
+            batteryList.add(battery);
         }
         else
         {

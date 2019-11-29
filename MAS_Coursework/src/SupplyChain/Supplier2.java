@@ -54,14 +54,14 @@ public class Supplier2 extends Agent {
                     if(ce instanceof Owns){
                         Owns owns = (Owns) ce;
                         Phone ph = owns.getPhone();
-                        System.out.println("Amount of ram: " + ramList.indexOf(ram.getSerialNumber()));
-                        System.out.print("Amount of storage: " + storageList.indexOf(storage.getSerialNumber()));
+                        System.out.println("Amount of ram: " + ramList.indexOf(ram.getRamList()));
+                        System.out.print("Amount of storage: " + storageList.indexOf(storage.getStorageList()));
 
-                        if(itemsForSale.containsKey(ramList.indexOf(ram.getSerialNumber()))){
+                        if(itemsForSale.containsKey(ramList.indexOf(ram.getRamList()))){
                             System.out.println("Requested Ram in stock");
                         }
 
-                        if(itemsForSale.containsKey(storageList.indexOf(storage.getSerialNumber()))){
+                        if(itemsForSale.containsKey(storageList.indexOf(storage.getStorageList()))){
                             System.out.println("Requested Storage in stock");
                         }
 
@@ -104,12 +104,12 @@ public class Supplier2 extends Agent {
                             Phone ph = order.getPhone();
 
                             if(ph instanceof Phone){
-                                if(itemsForSale.containsKey(ramList.indexOf(ram.getSerialNumber()))) {
-                                    System.out.println(ramList.indexOf(ram.getSerialNumber()) + "Ram Sold");
+                                if(itemsForSale.containsKey(ramList.indexOf(ram.getRamList()))) {
+                                    System.out.println(ramList.indexOf(ram.getRamList()) + "Ram Sold");
                                 }
 
-                                if(itemsForSale.containsKey(storageList.indexOf(storage.getSerialNumber()))){
-                                    System.out.println(storageList.indexOf(storage.getSerialNumber()) + "Storage Sold");
+                                if(itemsForSale.containsKey(storageList.indexOf(storage.getStorageList()))){
+                                    System.out.println(storageList.indexOf(storage.getStorageList()) + "Storage Sold");
                                 }
 
                                 }

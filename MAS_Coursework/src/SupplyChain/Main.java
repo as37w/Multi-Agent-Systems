@@ -16,7 +16,7 @@ public class Main {
             ContainerController myContainer = myRuntime.createMainContainer(myProfile);
             AgentController rma = myContainer.createNewAgent("rma", "jade.tools.rma.rma", (Object[])null);
             rma.start();
-            AgentController Manufacturer = myContainer.createNewAgent("seller", Manfacturer.class.getCanonicalName(), (Object[])null);
+            AgentController Manufacturer = myContainer.createNewAgent("manufacturer", Manfacturer.class.getCanonicalName(), (Object[])null);
             Manufacturer.start();
 
             AgentController Customer = myContainer.createNewAgent("customer", Customer.class.getCanonicalName(), (Object[])null);
@@ -32,10 +32,6 @@ public class Main {
             Ticker.start();
 
 
-            int numCust = 1;
-            for(int i = 0; i <= numCust; i++){
-                Customer = myContainer.createNewAgent("Customer" + i, SupplyChain.Customer.class.getCanonicalName(), null);
-            }
         } catch (Exception var8) {
             System.out.println("Exception starting agent: " + var8.toString());
         }
