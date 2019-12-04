@@ -13,7 +13,8 @@ import jade.lang.acl.MessageTemplate;
 import java.util.ArrayList;
 
 public class Ticker extends Agent {
-    public static final int NUM_DAYS = 10;
+    public static final int NUM_DAYS = 100
+            ;
     @Override
     protected void setup() {
         //add this agent to the yellow pages
@@ -30,7 +31,7 @@ public class Ticker extends Agent {
             e.printStackTrace();
         }
         //wait for the other agents to start
-        doWait(5000);
+        doWait(20000);
         addBehaviour(new SynchAgentsBehaviour(this));
     }
 
@@ -76,13 +77,9 @@ public class Ticker extends Agent {
 
                     DFAgentDescription template3 = new DFAgentDescription();
                     ServiceDescription sd3 = new ServiceDescription();
-                    sd3.setType("supplier1");
+                    sd3.setType("supplier");
                     template3.addServices(sd3);
 
-                    DFAgentDescription template4 = new DFAgentDescription();
-                    ServiceDescription sd4 = new ServiceDescription();
-                    sd4.setType("supplier2");
-                    template4.addServices(sd4);
 
                     try{
                         DFAgentDescription[] agentsType1  = DFService.search(myAgent,template1);
@@ -92,6 +89,11 @@ public class Ticker extends Agent {
                         DFAgentDescription[] agentsType2  = DFService.search(myAgent,template2);
                         for(int i=0; i<agentsType2.length; i++){
                             simulationAgents.add(agentsType2[i].getName()); // this is the AID
+                        }
+
+                        DFAgentDescription[] agentsType3  = DFService.search(myAgent,template3);
+                        for(int i=0; i<agentsType3.length; i++){
+                            simulationAgents.add(agentsType3[i].getName()); // this is the AID
                         }
                     }
                     catch(FIPAException e) {
@@ -113,7 +115,7 @@ public class Ticker extends Agent {
                     ACLMessage msg = myAgent.receive(mt);
                     if(msg != null) {
                         numFinReceived++;
-                        if(numFinReceived >= simulationAgents.size() - 2) {
+                        if(numFinReceived >= simulationAgents.size()) {
                             step++;
                         }
                     }

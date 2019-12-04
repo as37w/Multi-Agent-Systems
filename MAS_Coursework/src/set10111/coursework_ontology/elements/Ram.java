@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 public class Ram extends Item{
     private int size;
-    private Boolean firstCall;
     private ArrayList<Integer> ramList = new ArrayList<>();
 
 
@@ -22,19 +21,5 @@ public class Ram extends Item{
 
     public ArrayList<Integer> getRamList(){
         return ramList;
-    }
-
-    public void setRamList(int ram){
-        if(firstCall){
-            ramList.add(0);
-            firstCall = false;
-            ramList.add(ram);
-        }
-        else
-        {
-            ramList.add(ram);
-        }
-
-
     }
 }

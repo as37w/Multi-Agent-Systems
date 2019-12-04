@@ -2,6 +2,7 @@ package SupplyChain;
 
 import com.sun.org.apache.xerces.internal.util.SynchronizedSymbolTable;
 import com.sun.org.apache.xpath.internal.operations.Or;
+import jade.content.ContentElement;
 import jade.content.lang.Codec;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.Ontology;
@@ -33,6 +34,7 @@ public class Customer extends Agent {
     private ArrayList<Phone> phonesToBuy = new ArrayList<>();
     private AID tickerAgent;
     int numOrdersSent;
+    Order order = new Order();
 
     Item item = new Item();
     ArrayList<Item> itemList = new ArrayList<>();
@@ -43,11 +45,6 @@ public class Customer extends Agent {
     Storage storage = new Storage();
     Battery battery = new Battery();
     Screen screen = new Screen();
-
-    ArrayList<Integer> batteryList = battery.getBatteryList();
-    ArrayList<Integer> screenList = screen.getScreenList();
-    ArrayList<Integer> ramList = ram.getRamList();
-    ArrayList<Integer> storageList = storage.getStorageList();
 
 
     @Override
@@ -102,7 +99,9 @@ public class Customer extends Agent {
                     //sub-behaviours will execute in the order they are added
                     dailyActivity.addSubBehaviour(new findManufacturer(myAgent));
                     dailyActivity.addSubBehaviour(new sendOrders(myAgent));
+                    dailyActivity.addSubBehaviour(new recieveOrders(myAgent));
                     dailyActivity.addSubBehaviour(new endDay(myAgent));
+
                     myAgent.addBehaviour(dailyActivity);
                 } else {
                     //termination message to end simulation
@@ -131,7 +130,6 @@ public class Customer extends Agent {
                 DFAgentDescription[] agentsType1 = DFService.search(myAgent, manufacturerTemplate);
                 for (int i = 0; i < agentsType1.length; i++) {
                     manufacturers.add(agentsType1[i].getName()); // this is the AID
-                    System.out.println(manufacturers.toString());
                 }
             } catch (FIPAException e) {
                 e.printStackTrace();
@@ -158,11 +156,11 @@ public class Customer extends Agent {
             reqOrd.setOntology(ontology.getName());
             reqOrd.setConversationId("cust-order");
 
-            Order order = new Order();
+
             order.setPhone(phone);
             order.setParts(itemList);
-
-            System.out.println(item.toString());
+            order.setPhoneOrderQuantity(phone.getQuantity());
+            order.setOrderCost(phone.getPricePerUnit() * phone.getQuantity());
 
             SendOrder sendOrder = new SendOrder();
             sendOrder.setCustomer(this.myAgent.getAID());
@@ -175,7 +173,6 @@ public class Customer extends Agent {
             try {
                 getContentManager().fillContent(reqOrd, request); //send the wrapper object
                 send(reqOrd);
-                System.out.println(reqOrd.toString());
 
             } catch (Codec.CodecException ce) {
                 ce.printStackTrace();
@@ -194,14 +191,12 @@ public class Customer extends Agent {
         if (Math.random() < 0.5) {
             //small phone
             battery.setCapacity(2000);
-            System.out.println(battery.getCapacity());
             itemList.add(battery);
             screen.setLength(5);
             itemList.add(screen);
         } else {
             //phablet
             battery.setCapacity(3000);
-            System.out.println(battery.getCapacity());
             itemList.add(battery);
             screen.setLength(7);
             itemList.add(screen);
@@ -223,24 +218,58 @@ public class Customer extends Agent {
 
 
         phone.setSerialNumber();
+        phone.setQuantity(Math.floor(1 + 50 * Math.random()));
+        phone.setPricePerUnit(Math.floor(100 + 500 * Math.random()));
+        phone.setnumDaysDue(Math.floor(1 + 10 * Math.random()));
+        phone.setPerDayPenalty(phone.getQuantity() * Math.floor(1 + 50 * Math.random()));
+        phonesToBuy.add(phone);
+        System.out.println("Customer ordered: " + phone.getQuantity() + ", order due in " + phone.getNumDaysDue() + " days.");
+        ordersSent++;
+    }
 
-
-        if (phone.getPricePerUnit() > 350 || phone.getPricePerUnit()< 350) {
-            phone.setQuantity(Math.floor(1 + 50 * Math.random()));
-            phone.setPricePerUnit(Math.floor(100 + 500 * Math.random()));
-            phone.setnumDaysDue(Math.floor(1 + 10 * Math.random()));
-            phone.setPerDayPenalty(phone.getQuantity() * Math.floor(1 + 50 * Math.random()));
-            phonesToBuy.add(phone);
-            System.out.println("Customer ordered: " + phone.getQuantity() + ", order due in " + phone.getNumDaysDue() + " days.");
-            ordersSent++;
-        } else {
-            System.out.println("Customer order did not meet minimum amount");
-            ordersSent++;
+    private class recieveOrders extends OneShotBehaviour {
+        public recieveOrders(Agent a) {
+            super(a);
         }
+
+        @Override
+        public void action() {
+
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId("completed-order"), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+            ACLMessage msg = myAgent.receive(mt);
+            if (msg != null) {
+                try {
+                    ContentElement ce = null;
+                    ce = getContentManager().extractContent(msg);//ERROR
+                    Action available = (Action) ce;
+                    SendOrder sendorder = ((SendOrder) available.getAction());// this is the order requested
+                    System.out.println("Customer has received: Order ID: " + sendorder.getOrder());
+
+
+                    order = sendorder.getOrder();
+                    phone = order.getPhone();
+                    order.setPhoneOrderQuantity(phone.getQuantity());
+
+                    itemList = order.getParts();
+
+                } catch (Codec.CodecException ce) {
+                    ce.printStackTrace();
+                } catch (OntologyException oe) {
+                    oe.printStackTrace();
+                }
+
+            }
+
+        }
+
+
     }
 
     private class endDay extends OneShotBehaviour {
-        public endDay(Agent a){super(a);}
+        public endDay(Agent a) {
+            super(a);
+        }
+
         @Override
         public void action() {
             ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
@@ -251,4 +280,7 @@ public class Customer extends Agent {
 
 
     }
+
+
+
 }

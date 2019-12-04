@@ -16,25 +16,8 @@ public class Battery extends Item {
         return capacity;
     }
 
-    public void setCapacity(Integer capacity){
+    public void setCapacity(int capacity){
         this.capacity= capacity;
-    }
-
-    public ArrayList<Integer> getBatteryList(){
-        return batteryList;
-    }
-
-    public void setBatteryList(int battery){
-        if(firstCall){
-            batteryList.add(0);
-            firstCall = false;
-            batteryList.add(battery);
-        }
-        else
-        {
-            batteryList.add(battery);
-        }
-
     }
 
 

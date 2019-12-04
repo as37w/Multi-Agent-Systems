@@ -12,7 +12,7 @@ public class Phone implements Concept {
     private double perDayPenalty;
     private double pricePerUnit;
 
-    @Slot (mandatory = true)
+
     public int getSerialNumber(){
         return serialNumber;
     }

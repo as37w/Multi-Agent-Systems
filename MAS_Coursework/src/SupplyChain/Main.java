@@ -22,7 +22,14 @@ public class Main {
             AgentController Customer = myContainer.createNewAgent("customer", Customer.class.getCanonicalName(), (Object[])null);
             Customer.start();
 
-            AgentController Supplier1 = myContainer.createNewAgent("supplier1", SupplyChain.Supplier1.class.getCanonicalName(), null);
+            AgentController Customer1= myContainer.createNewAgent("customer1", Customer.class.getCanonicalName(), (Object[])null);
+            Customer1.start();
+
+            AgentController Customer2= myContainer.createNewAgent("customer2", Customer.class.getCanonicalName(), (Object[])null);
+            Customer2.start();
+
+
+            AgentController Supplier1 = myContainer.createNewAgent("supplier", SupplyChain.Supplier1.class.getCanonicalName(), null);
             Supplier1.start();
 
             AgentController Supplier2 = myContainer.createNewAgent("supplier2", SupplyChain.Supplier2.class.getCanonicalName(), null);

@@ -5,7 +5,6 @@ import jade.content.onto.annotations.Slot;
 import java.util.ArrayList;
 
 public class Screen extends Item {
-    private Boolean firstCall = true;
     private int length;
     private ArrayList<Integer> screenList = new ArrayList<>();
 
@@ -17,23 +16,6 @@ public class Screen extends Item {
 
     public void setLength(int length) {
         this.length = length;
-    }
-
-    public ArrayList<Integer> getScreenList(){
-        return screenList;
-    }
-
-    public void setScreenList(Integer screen){
-        if(firstCall){
-            screenList.add(0);
-            firstCall = false;
-            screenList.add(screen);
-        }
-        else
-        {
-            screenList.add(screen);
-        }
-
     }
 }
 

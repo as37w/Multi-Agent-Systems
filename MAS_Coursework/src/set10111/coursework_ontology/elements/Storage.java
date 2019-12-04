@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 public class Storage extends Item {
     private int space;
-    private boolean firstCall = true;
     private ArrayList<Integer> storageList = new ArrayList<>();
 
     @Slot(mandatory = true)
@@ -23,17 +22,5 @@ public class Storage extends Item {
         return storageList;
     }
 
-    public void setStorageList(int storage){
-        if(firstCall){
-            storageList.add(0);
-            firstCall = false;
-            storageList.add(storage);
-        }
-        else
-        {
-            storageList.add(storage);
-        }
-
-    }
 }
 

@@ -7,10 +7,12 @@ import java.util.ArrayList;
 
 public class Order implements Concept {
     private Phone phone;
+    private double phoneOrderQuantity;
+    private double orderCost;
     private ArrayList<Item> parts = new ArrayList<Item>();
 
     @Slot (mandatory = true)
-    public Phone getPhone(Phone phone){
+    public Phone getPhone(){
         return phone;
     }
 
@@ -32,5 +34,27 @@ public class Order implements Concept {
         public ArrayList<Item> getParts(){
             return parts;
         }
+
+        public double getPhoneOrderQuantity()
+        {
+            return phoneOrderQuantity;
+        }
+
+        public void setPhoneOrderQuantity(Double phoneOrderQuantity)
+        {
+            this.phoneOrderQuantity = phoneOrderQuantity;
+        }
+
+        public double getOrderCost(){
+        return orderCost;
+        }
+
+        public void setOrderCost(double orderCost)
+        {
+            this.orderCost = orderCost;
+        }
     }
+
+
+
 
