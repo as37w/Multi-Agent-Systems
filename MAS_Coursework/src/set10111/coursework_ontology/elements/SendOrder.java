@@ -1,6 +1,7 @@
 package set10111.coursework_ontology.elements;
 
 import jade.content.AgentAction;
+import jade.content.onto.annotations.Slot;
 import jade.core.AID;
 import jade.core.Agent;
 
@@ -12,6 +13,7 @@ public class SendOrder implements AgentAction {
         return customer;
     }
 
+    @Slot (mandatory = true)
     public void setCustomer(AID customerAID){
         customer = customerAID;
     }
@@ -20,6 +22,7 @@ public class SendOrder implements AgentAction {
         return order;
     }
 
+    @Slot (mandatory = true)
     public void setOrder(Order newOrder){
         order = newOrder;
 

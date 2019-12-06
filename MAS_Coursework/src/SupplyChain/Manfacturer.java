@@ -7,13 +7,10 @@ import jade.content.onto.Ontology;
 import jade.content.onto.OntologyException;
 import jade.content.onto.basic.Action;
 import jade.core.*;
-import jade.core.behaviours.SequentialBehaviour;
+import jade.core.behaviours.*;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import set10111.coursework_ontology.Ecommerce.EcommerceOntology;
 import set10111.coursework_ontology.elements.*;
-import jade.core.behaviours.Behaviour;
-import jade.core.behaviours.CyclicBehaviour;
-import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -43,6 +40,8 @@ public class Manfacturer extends Agent {
     private double dailyWarehouseCost = 0;
     private int totalComponents = 0;
     private double profit = 0;
+    private int no_of_customers = 0;
+    private int phonesMade = 0;
 
 
     Phone phone = new Phone();
@@ -54,8 +53,6 @@ public class Manfacturer extends Agent {
     Order sendToCustomer = new Order();
 
     //If statement to check warehouse against parts for each list then request from supplier
-    ArrayList<Integer> batteryList = battery.getBatteryList();
-    ArrayList<Integer> screenList = screen.getScreenList();
     ArrayList<Integer> ramList = ram.getRamList();
     ArrayList<Integer> storageList = storage.getStorageList();
     ArrayList<Item> itemList = new ArrayList();
@@ -150,7 +147,7 @@ public class Manfacturer extends Agent {
             }
         }
 
-        public class recieveOrders extends OneShotBehaviour {
+        public class recieveOrders extends SimpleBehaviour {
             public recieveOrders(Agent a) {
                 super(a);
             }
@@ -160,49 +157,58 @@ public class Manfacturer extends Agent {
                 MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId("cust-order"), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
                 ACLMessage msg = myAgent.receive(mt);
                 if (msg != null) {
+                    no_of_customers++;
                     try {
                         ContentElement ce = null;
                         ce = getContentManager().extractContent(msg);//ERROR
                         Action available = (Action) ce;
                         SendOrder sendorder = ((SendOrder) available.getAction());// this is the order requested
-                        System.out.println("Manufacturer has received: Order ID: " + sendorder.getOrder());
+                        System.out.println( myAgent.getName() + " has recieved order!");
                         phonesToCreate.add(phone);
 
                         order = sendorder.getOrder();
-                        phone = order.getPhone();
-                        order.setPhoneOrderQuantity(phone.getQuantity());
+                        if (order.getOrderCost() < 350) {
+                            System.out.println("Order does not meet minimum amount of 350. Order Rejected");
+                            order = new Order();
+                        } else {
 
-                        currentMoney = currentMoney += order.getOrderCost();
 
-                        itemList = order.getParts();
+                            phone = order.getPhone();
+                            order.setPhoneOrderQuantity(phone.getQuantity());
 
-                        for (Item parts : itemList) {
+                            currentMoney = currentMoney += order.getOrderCost();
 
-                            if (parts instanceof Screen) {
+                            itemList = order.getParts();
 
-                                screenList.add(((Screen) parts).getLength());
+                            for (Item parts : itemList) {
+
+                                if (parts instanceof Storage) {
+                                    storageList.add(((Storage) parts).getSpace());
+                                }
+                                if (parts instanceof Ram) {
+                                    ramList.add(((Ram) parts).getSize());
+                                }
+
+
+                                customer = sendorder.getCustomer();
                             }
-                            if (parts instanceof Battery) {
-                                batteryList.add(((Battery) parts).getCapacity());
-                            }
-                            if (parts instanceof Storage) {
-                                storageList.add(((Storage) parts).getSpace());
-                            }
-                            if (parts instanceof Ram) {
-                                ramList.add(((Ram) parts).getSize());
-                            }
 
-
-                            customer = sendorder.getCustomer();
                         }
 
-                    } catch (Codec.CodecException ce) {
+                    }catch(Codec.CodecException ce){
                         ce.printStackTrace();
-                    } catch (OntologyException oe) {
+                    } catch(OntologyException oe){
                         oe.printStackTrace();
                     }
+                }
+            }
 
-
+            public boolean done(){
+                if (no_of_customers == 1){
+                    no_of_customers = 0;
+                    return true;
+                }else{
+                    return false;
                 }
             }
         }
@@ -278,7 +284,7 @@ public class Manfacturer extends Agent {
                         ce = getContentManager().extractContent(msg);//ERROR
                         Action available = (Action) ce;
                         SendOrder sendorder = ((SendOrder) available.getAction());// this is the order requested
-                        System.out.println("Manufacturer has received: Order ID: " + sendorder.getOrder());
+                        System.out.println(myAgent.getName() + " has recieved parts from supplier");
                         phonesToCreate.add(phone);
 
                          order = sendorder.getOrder();
@@ -511,6 +517,12 @@ public class Manfacturer extends Agent {
 
                 }
 
+                if (phonesMade + (int)order.getPhoneOrderQuantity() <= 50 )
+                {
+
+
+
+
                 if (partsInStock == 3) {
                     ACLMessage reqOrd = new ACLMessage(ACLMessage.REQUEST);
 
@@ -518,12 +530,14 @@ public class Manfacturer extends Agent {
                     reqOrd.setLanguage(codec.getName());
                     reqOrd.setOntology(ontology.getName());
 
-
+                    sendToCustomer = order;
                     reqOrd.setConversationId("completed-order");
                     SendOrder sendOrder = new SendOrder();
                     sendOrder.setCustomer(this.myAgent.getAID());
                     sendOrder.setOrder(sendToCustomer);
 
+
+                    phonesMade = phonesMade + (int) sendToCustomer.getPhoneOrderQuantity();
 
                     Action request = new Action();
                     request.setAction(sendOrder);
@@ -538,9 +552,9 @@ public class Manfacturer extends Agent {
                     } catch (OntologyException oe) {
 
                     }
-
-
                 }
+
+               }
             }
 
         }
@@ -581,6 +595,7 @@ public class Manfacturer extends Agent {
                 suppliers.clear();
                 profit = currentMoney - dailyWarehouseCost;
                 System.out.println("Todays profit: £" +  profit);
+                phonesMade = 0;
                 msg.setContent("done");
                 myAgent.send(msg);
             }

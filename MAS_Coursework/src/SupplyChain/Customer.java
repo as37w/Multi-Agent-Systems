@@ -243,7 +243,7 @@ public class Customer extends Agent {
                     ce = getContentManager().extractContent(msg);//ERROR
                     Action available = (Action) ce;
                     SendOrder sendorder = ((SendOrder) available.getAction());// this is the order requested
-                    System.out.println("Customer has received: Order ID: " + sendorder.getOrder());
+                    System.out.println(myAgent.getName()+ " has recieved order");
 
 
                     order = sendorder.getOrder();

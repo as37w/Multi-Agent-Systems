@@ -32,6 +32,7 @@ public class Supplier2 extends Agent {
     ArrayList<Item> itemList = new ArrayList();
     ArrayList<Item> partsOrdered = new ArrayList<>();
     private ArrayList<AID> manufacturer = new ArrayList<>();
+    int daysPassed = 0;
 
     Ram ram = new Ram();
     Storage storage = new Storage();
@@ -82,7 +83,6 @@ public class Supplier2 extends Agent {
                     tickerAgent = msg.getSender();
                 }
                 if (msg.getContent().equals("new day")) {
-                    System.out.println("doo");
                     SequentialBehaviour dailyActivity = new SequentialBehaviour();
                     dailyActivity.addSubBehaviour(new recieveOrders(myAgent));
                     dailyActivity.addSubBehaviour(new sendParts(myAgent));
@@ -108,7 +108,7 @@ public class Supplier2 extends Agent {
                         ce = getContentManager().extractContent(msg);//ERROR
                         Action available = (Action) ce;
                         SendOrder sendorder = ((SendOrder) available.getAction());// this is the order requested
-                        System.out.println("Supplier has received: Order ID: " + sendorder.getOrder());
+                        System.out.println(myAgent.getAID() + " has recieved order");
 
 
                         order = sendorder.getOrder();
@@ -117,22 +117,6 @@ public class Supplier2 extends Agent {
 
                         itemList = order.getParts();
 
-                        System.out.println("snake" + order.getParts());
-
-
-                        for (Item parts : itemList) {
-
-                            if (parts instanceof Storage) {
-                                System.out.println("Supplier1 has received order for: " + ((Storage) parts).getSpace());
-                                storageList.add(((Storage) parts).getSpace());
-                            }
-                            if (parts instanceof Ram) {
-                                System.out.println("Supplier1 has received order for:: " + ((Ram) parts).getSize());
-                                ramList.add(((Ram) parts).getSize());
-                            }
-
-
-                        }
 
                     } catch (Codec.CodecException ce) {
                         ce.printStackTrace();
@@ -152,57 +136,57 @@ public class Supplier2 extends Agent {
 
             @Override
             public void action() {
-                if (itemList != null) {
-                    DFAgentDescription manufacturerTemplate = new DFAgentDescription();
-                    ServiceDescription sd = new ServiceDescription();
-                    sd.setType("manufacturer");
-                    manufacturerTemplate.addServices(sd);
-                    try {
-                        DFAgentDescription[] agentsType1 = DFService.search(myAgent,  manufacturerTemplate);
-                        for (int i = 0; i < agentsType1.length; i++) {
-                            manufacturer.add(agentsType1[i].getName()); // this is the AID
+                if(daysPassed == 4) {
+                    daysPassed = 0;
+                    if (itemList != null) {
+                        DFAgentDescription manufacturerTemplate = new DFAgentDescription();
+                        ServiceDescription sd = new ServiceDescription();
+                        sd.setType("manufacturer");
+                        manufacturerTemplate.addServices(sd);
+                        try {
+                            DFAgentDescription[] agentsType1 = DFService.search(myAgent, manufacturerTemplate);
+                            for (int i = 0; i < agentsType1.length; i++) {
+                                manufacturer.add(agentsType1[i].getName()); // this is the AID
 
+                            }
+
+                        } catch (FIPAException e) {
+                            e.printStackTrace();
                         }
 
-                    } catch (FIPAException e) {
-                        e.printStackTrace();
+
+                        ACLMessage reqOrd = new ACLMessage(ACLMessage.REQUEST);
+
+                        reqOrd.addReceiver(manufacturer.get(0));
+                        reqOrd.setLanguage(codec.getName());
+                        reqOrd.setOntology(ontology.getName());
+
+
+                        reqOrd.setConversationId("supplier-parts");
+                        SendOrder sendOrder = new SendOrder();
+                        sendOrder.setCustomer(this.myAgent.getAID());
+                        sendOrder.setOrder(order);
+
+
+                        Action request = new Action();
+                        request.setAction(sendOrder);
+                        request.setActor(manufacturer.get(0));
+
+                        System.out.println(myAgent.getAID() + " has sent parts for order");
+
+                        try {
+                            getContentManager().fillContent(reqOrd, request); //send the wrapper object
+                            send(reqOrd);
+
+                        } catch (Codec.CodecException ce) {
+                            ce.printStackTrace();
+                        } catch (OntologyException oe) {
+                        }
+
+
                     }
-
-
-
-
-                    ACLMessage reqOrd = new ACLMessage(ACLMessage.REQUEST);
-
-                    reqOrd.addReceiver(manufacturer.get(0));
-                    reqOrd.setLanguage(codec.getName());
-                    reqOrd.setOntology(ontology.getName());
-
-
-                    reqOrd.setConversationId("supplier-parts");
-                    SendOrder sendOrder = new SendOrder();
-                    sendOrder.setCustomer(this.myAgent.getAID());
-                    sendOrder.setOrder(order);
-
-
-
-
-                    Action request = new Action();
-                    request.setAction(sendOrder);
-                    request.setActor(manufacturer.get(0));
-
-                    try {
-                        getContentManager().fillContent(reqOrd, request); //send the wrapper object
-                        send(reqOrd);
-
-                    } catch (Codec.CodecException ce) {
-                        ce.printStackTrace();
-                    } catch (OntologyException oe){
-                    }
-
-
+                    daysPassed++;
                 }
-
-
             }
         }
     }

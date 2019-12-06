@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 public class Screen extends Item {
     private int length;
-    private ArrayList<Integer> screenList = new ArrayList<>();
 
     @Slot(mandatory = true)
 

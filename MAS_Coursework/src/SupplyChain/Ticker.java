@@ -31,7 +31,7 @@ public class Ticker extends Agent {
             e.printStackTrace();
         }
         //wait for the other agents to start
-        doWait(20000);
+        doWait(5000);
         addBehaviour(new SynchAgentsBehaviour(this));
     }
 
