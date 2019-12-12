@@ -594,7 +594,7 @@ public class Manfacturer extends Agent {
                 msg.addReceiver(tickerAgent);
                 suppliers.clear();
                 profit = currentMoney - dailyWarehouseCost;
-                System.out.println("Todays profit: £" +  profit);
+                System.out.println("Total profit to date: £" +  profit);
                 phonesMade = 0;
                 msg.setContent("done");
                 myAgent.send(msg);
